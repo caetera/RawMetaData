@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Helper script to create parameter table draft
+"""
 import pandas as pd
 
 fields = {"InstrumentData":

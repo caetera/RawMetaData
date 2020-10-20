@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import sys
 from os import path, listdir, chdir
@@ -8,7 +9,7 @@ from datetime import datetime
 
 def recursiveListing(filepath, process_file):
     """
-    Recorsively traverse filepath and process each file
+    Recorsively walk filepath and apply process_file function to all RAW files
     """
     for name in listdir(filepath):
         currentpath = path.join(filepath, name)
@@ -22,6 +23,7 @@ def process_path(dirpath, outputfile):
     """
     Main function
     """
+    #some checks
     if not path.exists(dirpath):
         print("Path does not exist!")
         return 1
@@ -30,6 +32,7 @@ def process_path(dirpath, outputfile):
         print("Path is not folder")
         return 1
     
+    #for now SQLite
     try:
         output = create_engine("sqlite:///{}".format(outputfile))
     except:
@@ -49,7 +52,10 @@ def process_path(dirpath, outputfile):
     recursiveListing(".", record_wrapper)
 
 if __name__ == "__main__":
-    start = datetime.now()
-    process_path(sys.argv[1], sys.argv[2])
-    end = datetime.now()
-    print("Start: {}; End: {}; Duration: {}".format(start, end, end - start))
+    if len(sys.argv) > 2:
+        start = datetime.now()
+        process_path(sys.argv[1], sys.argv[2])
+        end = datetime.now()
+        print("Start: {}; End: {}; Duration: {}".format(start, end, end - start))
+    else:
+        print("Usage: Process.py [Path to process] [SQLite database file]")

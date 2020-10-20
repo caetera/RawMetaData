@@ -9,6 +9,7 @@ clr.AddReference(path.abspath("RawFileReader/ThermoFisher.CommonCore.Data.dll"))
 from ThermoFisher.CommonCore.Data.Business import RawFileReaderFactory
 from Method import methods_from_raw
 
+#string representation of types
 TypeMapping = {"Integer": Integer,
                "Float": Float,
                "String": String,
@@ -17,6 +18,9 @@ TypeMapping = {"Integer": Integer,
                "Boolean": Boolean}
 
 def load_parameter_table(table_file):
+    """
+    Read the table with parameters and select active ones
+    """
     try:
         table = read_csv(table_file)
     except:
@@ -41,6 +45,7 @@ def create_fields(table):
                   "MethodNames": Column(String),
                   "MethodTexts": Column(Text)}
     
+    #fields defined in the table
     table.apply(lambda row: param_dict.update(
                             {row["Field"]: 
                                 Column(TypeMapping[row["Type"]])}),
@@ -48,13 +53,16 @@ def create_fields(table):
     
     return param_dict
 
+#create FileRecord class
 SQLABase = declarative_base()
-
 table = load_parameter_table("parameter_table.csv")
-
 FileRecord = type("FileRecord", (SQLABase,), create_fields(table))
 
 def update_record_from_row(row, record, raw):
+    """
+    Receive paramter value from the raw file and store in in the record
+    (Suportive function for create_record)
+    """
     field_name = row["Field"]
     location = row["Location"].split("|")
     if field_name.endswith("Date"):#special case of .NET DateTime objects
@@ -67,14 +75,16 @@ def update_record_from_row(row, record, raw):
 
 def make_create_record(table):
     """
-    Dynamic method for creating records using a closure
+    Customize function extracting relevant infromation from rawfile
+    at runtime using parameter table
     """
     def create_record(filepath):
         """
-        Create inner function
+        Customizable function itself
         """
         record = FileRecord()
         
+        #common file system parameters
         record.VDSPath = filepath
         record.VDSFileName = path.split(filepath)[1]
         record.VDSSize = path.getsize(filepath)
@@ -103,9 +113,11 @@ def make_create_record(table):
             raw["FileHeader"] = rawFile.FileHeader
             raw["SampleInformation"] = rawFile.SampleInformation
             raw["RunHeaderEx"] = rawFile.RunHeaderEx
-        
+            
+            #parameters from the parameter table
             table.apply(update_record_from_row, axis=1, args=(record, raw))
             
+            #methods
             methods = methods_from_raw(rawFile)
             record.NumberOfMethods = len(methods)
             record.MethodNames = "|".join([method.Name for method in methods])
@@ -126,4 +138,5 @@ def make_create_record(table):
 
     return create_record
 
+#function to be exported for external code
 record_from_file = make_create_record(table)
