@@ -118,11 +118,17 @@ def make_create_record(table):
             table.apply(update_record_from_row, axis=1, args=(record, raw))
             
             #methods
-            methods = methods_from_raw(rawFile)
-            record.NumberOfMethods = len(methods)
-            record.MethodNames = "|".join([method.Name for method in methods])
-            record.MethodTexts =\
-                "\n\n{0}SPLITTER{0}\n\n".format("#"*10).join([method.Text for method in methods])
+            try:
+                methods = methods_from_raw(rawFile)
+                record.NumberOfMethods = len(methods)
+                record.MethodNames = "|".join([method.Name for method in methods])
+                record.MethodTexts =\
+                    "\n\n{0}SPLITTER{0}\n\n".format("#"*10).join([method.Text for method in methods])
+            except:
+                if not record.ErrorText is None:
+                    record.ErrorText += ", Methods not available"
+                else:
+                    record.ErrorText += "Methods not available"
             
             record.Error = False
         
