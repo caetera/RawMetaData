@@ -2,7 +2,7 @@
 
 This script recursively travels through the provided path, collects metadata from Thermo Raw files and stores them in SQL database.
 
-This software is using RawFileReader reading tool. Copyright © 2016 by Thermo Fisher Scientific, Inc. All rights reserved
+This software is using RawFileReader reading tool. Copyright Â© 2016 by Thermo Fisher Scientific, Inc. All rights reserved
 
 Main (exectuable) script is `Process.py`;  `FileRecord.py` contains classes and functions to work with records (i.e. structured information) of Thero Raw files;
 `Method.py` contains function to extract instrument method infromation from Thermo Raw files; `parameter_table.csv` contains a table that can be used to customize
@@ -24,4 +24,9 @@ Column description:
 
 # Usage
 
-    Process.py [Path to process] [Path to SQLite DB file]
+    Process.py [subcommand] [Path to process] [Path to SQLite DB file]
+
+Two subcommands are supported:
+
+* `build` create database from scratch
+* `update` rescans the path and updates database with the information from the files that are either not present or had error
